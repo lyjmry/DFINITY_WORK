@@ -1,0 +1,34 @@
+actor {
+    public type Message = {
+        id: Text;
+        time: Int;
+    };
+    type Time = Int;
+    public type Microblog = actor {
+        follow: shared(Principal) -> async (); // 增添关注对象
+        follows: shared query() -> async [Principal]; // 返回关注列表
+        post: shared(Text) -> async (); // 发布新消息
+        posts: shared query(Time.Time) -> async [Message]; // 返回所有发布的消息
+        timeline: shared () -> async [Message]; // 返回所有关注对象发布的消息
+    };
+
+    stable var followed : List.List<Principal> = List.nil();
+
+    public shared func follow(id: Principal) : async (){
+        followed := List.push(id, followed);
+    };
+
+    public shared query func follows() : async [Principal]{
+        List.toArray(followed);
+    };
+
+    stable var messages : List.List<Message> = List.nil();
+
+    public shared(msg) func post(text: Text) : async (){
+        assert(Principal.toText(msg.caller) == "xyhhn-v72fd-5zdqy-ka3ek-52ugn-cglgb-g4dya-b7yqk-miwo2-o33y4-gae");
+        let data = {
+            id = text;
+            time = Time.now();
+        };
+        messages := List.push(data, messages);
+    };
